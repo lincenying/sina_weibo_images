@@ -10,7 +10,7 @@ var node = {
     xml2js: require('xml2js'),
 };
 // 用户ID
-var userid = "1005051581435817";
+var userid = "1005051802311277";
 var weiboImages = {
     /**
      * 配置选项
@@ -95,7 +95,7 @@ var weiboImages = {
      * 解析单个页面并获取数据
      */
     parsePage: function(page, callback) {
-        console.log('开始分析页面妹子数据：%s', page.uri);
+        console.log('开始分析页面数据：%s', page.uri);
         var self = this;
         var json = JSON.parse(page.html);
         var $posts = json.cards[0].card_group || [],
@@ -109,7 +109,7 @@ var weiboImages = {
                 text: $list.text
             });
         };
-        console.log('分析页面妹子数据成功，共%d篇', $posts.length);
+        console.log('分析页面数据成功，共%d篇', $posts.length);
         callback(null, $posts.length);
     },
     /**
@@ -118,7 +118,7 @@ var weiboImages = {
     downAllImages: function(callback) {
         var self = this;
         var async = node.async;
-        console.log('开始全力下载所有妹子图片，共%d篇', self.posts.length);
+        console.log('开始全力下载所有图片，共%d篇', self.posts.length);
         async.eachSeries(self.posts, self.wrapTask(self.downPostImages), callback);
     },
     /**
@@ -175,7 +175,7 @@ var weiboImages = {
      * 下载post图片列表中的图片
      */
     downImages: function(post, callback) {
-        console.log('发现%d张妹子图片，准备开始下载...', post.images.length);
+        console.log('发现%d张图片，准备开始下载...', post.images.length);
         node.async.eachLimit(post.images, this.options.downLimit, this.wrapTask(this.downImage, this, [post]), callback);
     },
     /**
