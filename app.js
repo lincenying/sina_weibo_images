@@ -10,7 +10,8 @@ var node = {
     xml2js: require('xml2js'),
 };
 // 用户ID
-var userid = "1005051802311277";
+var userid = "1005051671578317",
+    weiboname = "橘玄叶MACX邪恶的小芽";
 var weiboImages = {
     /**
      * 配置选项
@@ -24,6 +25,7 @@ var weiboImages = {
         startPage: 1,
         // 图片并行下载上限
         downLimit: 5,
+        totalPage: 0,
         postFolerFormat: ''
     },
     posts: [],
@@ -88,6 +90,7 @@ var weiboImages = {
                 uri: uri,
                 html: body
             };
+
             callback(err, page);
         });
     },
@@ -98,11 +101,15 @@ var weiboImages = {
         console.log('开始分析页面数据：%s', page.uri);
         var self = this;
         var json = JSON.parse(page.html);
+        var arr_page = page.uri.split("page="),
+            curpage = arr_page[1];
         var $posts = json.cards[0].card_group || [],
             $list;
+        if ($posts.length) self.options.totalPage = curpage;
         for (var i = 0; i < $posts.length; i++) {
             $list = $posts[i].mblog;
             self.posts.push({
+                curpage: curpage,
                 id: $list.mid,
                 pics: $list.pics,
                 created_timestamp: $list.created_timestamp,
@@ -138,7 +145,7 @@ var weiboImages = {
         var path = node.path;
         var timestamp = post.created_timestamp;
         var postFolder = this.formatDate(timestamp);
-        saveTo = path.join(this.options.saveTo, userid);
+        saveTo = path.join(this.options.saveTo, weiboname);
         post.dir = path.join(saveTo, postFolder);
         console.log('准备创建目录：%s', post.dir);
         if (!post.pics) {
@@ -185,7 +192,7 @@ var weiboImages = {
         var url = node.url.parse(imgsrc);
         var fileName = node.path.basename(url.pathname);
         var toPath = node.path.join(post.dir, fileName);
-        console.log('开始下载图片：%s，保存到：%s，文件名：%s', imgsrc, post.dir, fileName);
+        console.log('开始下载图片：%s，保存到：%s，页数：%s / %s', fileName, post.dir, post.curpage, this.options.totalPage);
         node.request(encodeURI(imgsrc)).pipe(node.fs.createWriteStream(toPath)).on('close', function() {
             console.log('图片下载成功：%s', imgsrc);
             callback();
