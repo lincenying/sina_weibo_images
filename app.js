@@ -11,7 +11,7 @@ var node = {
 };
 // 用户ID
 var userid = "1005051581435817";
-var Me2SexImages = {
+var weiboImages = {
     /**
      * 配置选项
      */
@@ -210,4 +210,4 @@ var Me2SexImages = {
         return year + "-" + month + "-" + date + " " + hour + "_" + minute + "_" + second;
     }
 };
-Me2SexImages.start();
+weiboImages.start();
