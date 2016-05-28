@@ -10,8 +10,8 @@ var node = {
     xml2js: require('xml2js'),
 };
 // 用户ID
-var userid = "1005051671578317",
-    weiboname = "橘玄叶MACX邪恶的小芽";
+var userid = "1005051728752564",
+    weiboname = "鳗鱼霏儿";
 var weiboImages = {
     /**
      * 配置选项
