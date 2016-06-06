@@ -30,9 +30,9 @@ var Spider = {
         // 保存到此文件夹
         saveTo: './tomiaaa',
         // 从第几页开始下载
-        startPage: 161,
+        startPage: 284,
         // 到第一页结束
-        endPage: 388,
+        endPage: 284,
         // 图片并行下载上限
         downLimit: 5
     },
@@ -118,6 +118,11 @@ var Spider = {
      * 创建目录
      */
     mkdir(post, callback) {
+        if (post.loc.length <= 0) {
+            callback(null, post);
+            console.log('%s 没有图片'.error, post.title);
+            return;
+        }
         var path = node.path;
         post.dir = path.join(this.options.saveTo, post.title);
         console.log('准备创建目录：%s', post.dir);
@@ -137,6 +142,7 @@ var Spider = {
     downImages(post, callback) {
         console.log('发现%d张图片，准备开始下载...', post.loc.length);
         node.async.eachLimit(post.loc, this.options.downLimit, this.downImage.bind(this, post), (err) => {
+            console.log('%d张图片，已下载完毕...'.data, post.loc.length);
             callback(null, post.page)
         });
     },
@@ -149,9 +155,11 @@ var Spider = {
         fileName = fileName.split("?")[0];
         var toPath = node.path.join(post.dir, fileName);
         console.log('开始下载图片：%s，保存到：%s', fileName, post.dir);
-        node.request.get(encodeURI(imgsrc), {timeout: 10000}, function(err) {
+        node.request.get(encodeURI(imgsrc), {
+            timeout: 20000
+        }, function(err) {
             if (err) {
-                console.log('图片下载失败：%s'.error, imgsrc);
+                console.log('图片下载失败, code = ' + err.code + '：%s'.error, imgsrc);
                 callback();
             }
         }).pipe(node.fs.createWriteStream(toPath)).on('close', () => {
