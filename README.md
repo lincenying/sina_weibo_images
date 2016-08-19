@@ -10,10 +10,11 @@ weibo_like.js // 赞过的微博图片抓取 (async库 + request库 + cheerio库
 ```
 
 1. 安装nodejs
-2. git clone
-3. npm install
-4. 修改app.js中的userid和weiboname
-5. node app.js 开始抓取吧...
+2. git clone git@github.com:lincenying/spider_photo.git
+3. cd spider_photo
+4. npm install
+5. 修改app.js中的userid和weiboname
+6. node app.js 开始抓取吧...
 
 ### 如何获取userid?
 ```
