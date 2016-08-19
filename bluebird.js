@@ -1,5 +1,5 @@
-var colors = require('colors');
-var Promise = require('bluebird');
+var colors = require('colors')
+var Promise = require('bluebird')
 colors.setTheme({
     silly: 'rainbow',
     input: 'grey',
@@ -11,7 +11,7 @@ colors.setTheme({
     warn: 'yellow',
     debug: 'magenta',
     error: 'red'
-});
+})
 var node = {
     cheerio: require('cheerio'),
     fs: require('fs'),
@@ -32,7 +32,7 @@ var node = {
         downLimit: 5
     },
     posts: []
-};
+}
 
 function getIndex() {
     return new Promise((resolve, reject) => {
@@ -42,30 +42,30 @@ function getIndex() {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.54 Safari/537.36',
                 'Cookie': 'lang_set=zh;'
             }
-        };
+        }
         node.request(options, (err, res, body) => {
             if (err) {
-                reject(err);
+                reject(err)
             } else {
                 var page = {
                     page: 1,
                     uri: '',
                     html: body
-                };
-                resolve(page);
+                }
+                resolve(page)
             }
-        });
-    });
+        })
+    })
 }
 
 function parseIndex(data) {
-    var $ = node.cheerio.load(data.html);
-    var $posts = $('.grid__inner > li');
-    var src = [];
+    var $ = node.cheerio.load(data.html)
+    var $posts = $('.grid__inner > li')
+    var src = []
     $posts.each(function() {
-        var href = "http://bcy.net" + $(this).find(".work-thumbnail__bd").find("a").attr('href');
+        var href = "http://bcy.net" + $(this).find(".work-thumbnail__bd").find("a").attr('href')
         src.push(href)
-    });
+    })
     var post = {
         page: data.page,
         loc: src,
@@ -73,76 +73,78 @@ function parseIndex(data) {
     }
     return post
 }
+function downImage(imgsrc) {
+    return new Promise(resolve => {
+        imgsrc = imgsrc.replace("/w650", "")
+        var url = node.url.parse(imgsrc)
+        var fileName = node.path.basename(url.pathname)
+        fileName = fileName.split("?")[0]
+        var toPath = node.path.join(node.options.saveTo, fileName)
+        console.log('开始下载图片：%s', fileName)
+        node.request.get(encodeURI(imgsrc), {
+            timeout: 20000
+        }, function(err) {
+            if (err) {
+                console.log('图片下载失败, code = ' + err.code + '：%s'.error, imgsrc)
+                resolve(imgsrc + " => 0")
+            }
+        }).pipe(node.fs.createWriteStream(toPath)).on('close', () => {
+            console.log('图片下载成功：%s'.info, imgsrc)
+            resolve(imgsrc + " => 1")
+        }).on('error', () => {
+            resolve(imgsrc + " => 0")
+        })
+    })
+}
+
+
+
+function getOnePageImg(data) {
+    var $ = node.cheerio.load(data.html)
+    var $posts = $('.detail_std')
+    var src = []
+    $posts.each(function() {
+        var href = $(this).attr('src')
+        src.push(href)
+    })
+    return Promise.mapSeries(src, item => {
+        return downImage(item)
+    }, 3)
+}
 
 function getOnePage(item) {
     return new Promise((resolve, reject) => {
-        console.log('start: ' + item);
+        console.log('start: ' + item)
         var options = {
             url: item,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.54 Safari/537.36',
                 'Cookie': 'lang_set=zh;'
             }
-        };
+        }
         node.request(options, (err, res, body) => {
             if (err) {
-                reject(err);
+                reject(err)
             } else {
                 var page = {
                     page: 1,
                     uri: '',
                     html: body
-                };
-                resolve(page);
+                }
+                resolve(page)
             }
-        });
-    }).then((data) => {
+        })
+    }).then(data => {
         return getOnePageImg(data)
     })
 }
 
-function getOnePageImg(data) {
-    var $ = node.cheerio.load(data.html);
-    var $posts = $('.detail_std');
-    var src = [];
-    $posts.each(function() {
-        var href = $(this).attr('src');
-        src.push(href)
-    });
-    return Promise.mapSeries(src, (item, index) => {
-        return downImage(item);
-    }, 3)
-}
-
-function downImage(imgsrc) {
-    return new Promise((resolve, reject) => {
-        imgsrc = imgsrc.replace("/w650", "");
-        var url = node.url.parse(imgsrc);
-        var fileName = node.path.basename(url.pathname);
-        fileName = fileName.split("?")[0];
-        var toPath = node.path.join(node.options.saveTo, fileName);
-        console.log('开始下载图片：%s', fileName);
-        node.request.get(encodeURI(imgsrc), {
-            timeout: 20000
-        }, function(err) {
-            if (err) {
-                console.log('图片下载失败, code = ' + err.code + '：%s'.error, imgsrc);
-                resolve(imgsrc + " => 0");
-            }
-        }).pipe(node.fs.createWriteStream(toPath)).on('close', () => {
-            console.log('图片下载成功：%s'.info, imgsrc);
-            resolve(imgsrc + " => 1");
-        }).on('error', () => {
-            resolve(imgsrc + " => 0");
-        });
-    })
-}
-getIndex().then((data) => {
+getIndex().then(data => {
     return parseIndex(data)
-}).then((data) => {
-    return Promise.mapSeries(data.loc, (item, index) => {
-        return getOnePage(item);
+}).then(data => {
+    return Promise.mapSeries(data.loc, item => {
+        return getOnePage(item)
     })
-}).then((data) => {
+}).then(data => {
     console.log(data)
-});
+})
