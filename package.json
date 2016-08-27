@@ -14,12 +14,12 @@
   "author": "LinCenYing",
   "license": "MIT",
   "dependencies": {
-    "async": "^2.0.0-rc.5",
-    "bluebird": "^3.4.0",
-    "cheerio": "^0.20.0",
+    "async": "^2.0.1",
+    "bluebird": "^3.4.3",
+    "cheerio": "^0.22.0",
     "colors": "^1.1.2",
-    "mkdirp": "^0.5.0",
-    "request": "^2.51.0",
-    "url": "^0.10.2"
+    "mkdirp": "^0.5.1",
+    "request": "^2.74.0",
+    "url": "^0.11.0"
   }
 }
